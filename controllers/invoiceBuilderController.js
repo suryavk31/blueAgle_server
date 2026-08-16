@@ -746,26 +746,38 @@ function renderCanvasTemplateToHtml(data) {
     <style>
         @page { size: A4 ${orientation.toLowerCase()}; margin: 0; }
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 24px; background: #0f172a; color: #1e293b; display: flex; flex-direction: column; align-items: center; }
-        .action-bar { width: ${canvasWidth}px; margin: 0 auto 16px auto; display: flex; justify-content: space-between; align-items: center; color: #f8fafc; font-size: 13px; font-weight: 600; }
-        .btn-print { background: #6366f1; color: #ffffff; border: none; padding: 10px 22px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 16px 8px; background: #0f172a; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .action-bar { width: 100%; max-width: ${canvasWidth}px; margin: 0 auto 14px auto; display: flex; justify-content: space-between; align-items: center; gap: 10px; color: #f8fafc; font-size: 13px; font-weight: 600; padding: 0 4px; }
+        .template-tag { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
+        .btn-print { background: #6366f1; color: #ffffff; border: none; padding: 9px 18px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); white-space: nowrap; shrink: 0; }
         .btn-print:hover { background: #4f46e5; }
-        .canvas-container { width: ${canvasWidth}px; min-height: ${canvasHeight}px; position: relative; background: #ffffff; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden; border-radius: 4px; }
+        .canvas-wrapper { width: 100%; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: flex; justify-content: center; padding-bottom: 24px; }
+        .canvas-container { width: ${canvasWidth}px; min-width: ${canvasWidth}px; min-height: ${canvasHeight}px; position: relative; background: #ffffff; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden; border-radius: 4px; }
+        @media (max-width: 600px) {
+            body { padding: 10px 6px; }
+            .action-bar { font-size: 11px; margin-bottom: 10px; }
+            .template-tag { max-width: 50%; font-size: 11px; }
+            .btn-print { padding: 7px 12px; font-size: 11px; }
+            .canvas-wrapper { justify-content: flex-start; }
+        }
         @media print {
             body { background: #ffffff; padding: 0; display: block; }
             .action-bar { display: none !important; }
-            .canvas-container { box-shadow: none; border-radius: 0; width: 100% !important; min-height: 100% !important; }
+            .canvas-wrapper { display: block; width: 100%; overflow: visible; padding: 0; }
+            .canvas-container { box-shadow: none; border-radius: 0; width: 100% !important; min-width: 100% !important; min-height: 100% !important; }
         }
     </style>
 </head>
 <body>
     <div class="action-bar">
-        <div>📄 Template: <strong>${template.name}</strong> (v${template.version || 1}.0)</div>
-        <button onclick="window.print()" class="btn-print">🖨️ Print / Download PDF</button>
+        <div class="template-tag">📄 <strong>${template.name}</strong> (v${template.version || 1}.0)</div>
+        <button onclick="window.print()" class="btn-print">🖨️ Print / Download</button>
     </div>
 
-    <div class="canvas-container">
-        ${renderedElementsHtml}
+    <div class="canvas-wrapper">
+        <div class="canvas-container">
+            ${renderedElementsHtml}
+        </div>
     </div>
 </body>
 </html>`;
