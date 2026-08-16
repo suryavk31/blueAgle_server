@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { getAllUsers } = require('../controllers/userController');
-const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
+const { verifyAdminToken, requirePermission } = require('../middleware/adminAuthMiddleware');
 
-router.get('/', verifyToken, isAdmin, getAllUsers);
+// Get all customer users (Admin access)
+router.get('/', verifyAdminToken, requirePermission('Customers', 'View'), getAllUsers);
 
 module.exports = router;
+
