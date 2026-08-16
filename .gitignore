@@ -16,6 +16,7 @@ node_modules/
 *.local
 !.env.example
 
+
 # Credentials, Keys & Certificates
 serviceAccountKey.json
 *serviceAccount*.json
