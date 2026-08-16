@@ -10,11 +10,9 @@ pnpm-debug.log*
 node_modules/
 
 # Environment files
-.env
-.env.*
-*.env
+.env.local
+.env.*.local
 *.local
-!.env.example
 
 
 # Credentials, Keys & Certificates
