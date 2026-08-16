@@ -57,6 +57,7 @@ const Policy = sequelize.define('Policy', {
         allowNull: true,
     },
 }, {
+    tableName: 'policies',
     timestamps: true,
 });
 

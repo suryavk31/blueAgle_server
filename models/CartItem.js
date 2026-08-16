@@ -12,6 +12,7 @@ const CartItem = sequelize.define('CartItem', {
         defaultValue: 1,
     },
 }, {
+    tableName: 'cartitems',
     timestamps: true,
 });
 

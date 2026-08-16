@@ -17,6 +17,7 @@ const SubCategory = sequelize.define('SubCategory', {
     },
     // categoryId will be added via associations
 }, {
+    tableName: 'subcategories',
     timestamps: true,
 });
 

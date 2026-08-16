@@ -32,6 +32,7 @@ const InvoiceTemplateVersion = sequelize.define('InvoiceTemplateVersion', {
         allowNull: true,
     },
 }, {
+    tableName: 'invoicetemplateversions',
     timestamps: true,
 });
 

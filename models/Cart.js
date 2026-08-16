@@ -9,6 +9,7 @@ const Cart = sequelize.define('Cart', {
     },
     // userId association
 }, {
+    tableName: 'carts',
     timestamps: true,
 });
 

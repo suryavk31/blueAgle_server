@@ -17,6 +17,7 @@ const Category = sequelize.define('Category', {
         allowNull: true, // URL or path
     },
 }, {
+    tableName: 'categories',
     timestamps: true,
 });
 

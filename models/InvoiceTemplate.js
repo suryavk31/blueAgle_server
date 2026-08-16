@@ -86,6 +86,7 @@ const InvoiceTemplate = sequelize.define('InvoiceTemplate', {
         allowNull: true,
     },
 }, {
+    tableName: 'invoicetemplates',
     timestamps: true,
 });
 

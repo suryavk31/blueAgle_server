@@ -34,6 +34,7 @@ const Coupon = sequelize.define('Coupon', {
         defaultValue: true,
     },
 }, {
+    tableName: 'coupons',
     timestamps: true,
 });
 

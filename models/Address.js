@@ -40,6 +40,7 @@ const Address = sequelize.define('Address', {
         defaultValue: false,
     },
 }, {
+    tableName: 'addresses',
     timestamps: true,
 });
 

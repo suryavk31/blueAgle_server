@@ -20,6 +20,7 @@ const InvoiceTemplateCategory = sequelize.define('InvoiceTemplateCategory', {
         defaultValue: 0,
     },
 }, {
+    tableName: 'invoicetemplatecategories',
     timestamps: true,
 });
 

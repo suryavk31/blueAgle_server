@@ -24,6 +24,7 @@ const AdAnalytics = sequelize.define('AdAnalytics', {
         defaultValue: DataTypes.NOW,
     },
 }, {
+    tableName: 'adanalytics',
     timestamps: true,
 });
 

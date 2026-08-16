@@ -36,6 +36,7 @@ const PolicyVersion = sequelize.define('PolicyVersion', {
         allowNull: true, // AdminUser ID who published this version
     },
 }, {
+    tableName: 'policyversions',
     timestamps: true,
 });
 

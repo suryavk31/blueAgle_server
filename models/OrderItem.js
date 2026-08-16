@@ -21,6 +21,7 @@ const OrderItem = sequelize.define('OrderItem', {
         allowNull: false,
     },
 }, {
+    tableName: 'orderitems',
     timestamps: true,
 });
 

@@ -76,6 +76,7 @@ const InvoiceSetting = sequelize.define('InvoiceSetting', {
         defaultValue: 'Thank you for shopping with BlueAgle! For queries, contact billing@blueeagle.com.',
     },
 }, {
+    tableName: 'invoicesettings',
     timestamps: true,
 });
 

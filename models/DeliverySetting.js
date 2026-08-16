@@ -46,6 +46,7 @@ const DeliverySetting = sequelize.define('DeliverySetting', {
         defaultValue: true,
     },
 }, {
+    tableName: 'deliverysettings',
     timestamps: true,
 });
 

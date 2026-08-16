@@ -25,6 +25,7 @@ const InvoiceVariable = sequelize.define('InvoiceVariable', {
         defaultValue: 'General',
     },
 }, {
+    tableName: 'invoicevariables',
     timestamps: true,
 });
 

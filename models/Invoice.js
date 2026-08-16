@@ -70,6 +70,7 @@ const Invoice = sequelize.define('Invoice', {
         defaultValue: 'System',
     },
 }, {
+    tableName: 'invoices',
     timestamps: true,
 });
 

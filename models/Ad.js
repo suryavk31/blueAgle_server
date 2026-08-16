@@ -49,6 +49,7 @@ const Ad = sequelize.define('Ad', {
         defaultValue: 0,
     },
 }, {
+    tableName: 'ads',
     timestamps: true,
 });
 
