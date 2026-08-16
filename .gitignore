@@ -1,0 +1,38 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.*
+*.env
+*.local
+!.env.example
+
+# Credentials, Keys & Certificates
+serviceAccountKey.json
+*serviceAccount*.json
+*service_account*.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Uploads & Temporary files
+uploads/*
+!uploads/.gitkeep
+tmp/
+temp/
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
