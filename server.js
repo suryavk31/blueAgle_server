@@ -3,6 +3,7 @@
 // based on NODE_ENV. Must be required before any other module reads process.env.
 require('./config/env');
 
+const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -12,6 +13,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
 const { sequelize } = require('./models');
+const { initSocket } = require('./services/socketService');
 
 // ─── Production startup validation ───────────────────────────────────────────
 if (process.env.NODE_ENV === 'production') {
@@ -169,6 +171,8 @@ app.use('/api/invoice', invoiceBuilderRoutes);
 app.use('/api/admin/invoice', invoiceBuilderRoutes);
 app.use('/api/admin/invoice-builder', invoiceBuilderRoutes);
 
+const adminNotificationRoutes = require('./routes/adminNotificationRoutes');
+
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/admin/users', adminUsersRoutes);
 app.use('/api/admin/roles', rolesRoutes);
@@ -176,6 +180,7 @@ app.use('/api/admin/modules', modulesRoutes);
 app.use('/api/admin/permissions', permissionsRoutes);
 app.use('/api/admin/invitations', invitationsRoutes);
 app.use('/api/admin/activity-logs', activityLogsRoutes);
+app.use('/api/admin/notifications', adminNotificationRoutes);
 
 // ─── Resource Routes (Admin Aliases for adminApi) ─────────────────────────────
 app.use('/api/admin/analytics', analyticsRoutes);
@@ -211,6 +216,10 @@ app.use((err, req, res, next) => {
     });
 });
 
+// ─── HTTP & Socket.IO Server Setup ───────────────────────────────────────────
+const server = http.createServer(app);
+initSocket(server, allowedOrigins);
+
 // ─── Database Connection and Server Start ────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 
@@ -231,11 +240,12 @@ dbStartup
     .then(() => {
         const mode = isProduction ? 'connected' : 'connected & synced';
         console.log(`Database ${mode} successfully.`);
-        app.listen(PORT, () => {
-            console.log(`Server running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
+        server.listen(PORT, () => {
+            console.log(`Server & Socket.IO running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
         });
     })
     .catch((err) => {
         console.error('Database connection error:', err);
         process.exit(1);
     });
+

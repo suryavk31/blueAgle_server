@@ -49,6 +49,7 @@ const RolePermission = require('./RolePermission');
 const AdminInvitation = require('./AdminInvitation');
 const AdminSession = require('./AdminSession');
 const ActivityLog = require('./ActivityLog');
+const AdminFcmToken = require('./AdminFcmToken');
 
 // ─── Customer Associations ───────────────────────────────────────────────────
 
@@ -155,6 +156,10 @@ AdminInvitation.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
 AdminUser.hasMany(ActivityLog, { foreignKey: 'adminUserId', as: 'activityLogs' });
 ActivityLog.belongsTo(AdminUser, { foreignKey: 'adminUserId', as: 'adminUser' });
 
+// AdminUser <-> AdminFcmToken
+AdminUser.hasMany(AdminFcmToken, { foreignKey: 'adminUserId', as: 'fcmTokens', onDelete: 'CASCADE' });
+AdminFcmToken.belongsTo(AdminUser, { foreignKey: 'adminUserId', as: 'adminUser' });
+
 // Invoice Associations
 Order.hasOne(Invoice, { foreignKey: 'orderId' });
 Invoice.belongsTo(Order, { foreignKey: 'orderId' });
@@ -208,4 +213,6 @@ module.exports = {
     AdminInvitation,
     AdminSession,
     ActivityLog,
+    AdminFcmToken,
 };
+

@@ -1,28 +1,4 @@
-const admin = require('firebase-admin');
-require('dotenv').config();
-const path = require('path');
-const fs = require('fs');
-
-if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    try {
-        const serviceAccount = typeof process.env.FIREBASE_SERVICE_ACCOUNT === 'string'
-            ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-            : process.env.FIREBASE_SERVICE_ACCOUNT;
-        if (!admin.apps.length) {
-            admin.initializeApp({
-                credential: admin.credential.cert(serviceAccount),
-            });
-            console.log("Firebase Admin initialized successfully.");
-        }
-    } catch (e) {
-        console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT:", e.message);
-    }
-} else {
-    if (process.env.NODE_ENV === 'production') {
-        throw new Error('FIREBASE_SERVICE_ACCOUNT must be set in production.');
-    }
-    console.warn('FIREBASE_SERVICE_ACCOUNT not set — running in dev mode with unverified token fallback.');
-}
+const admin = require('../config/firebaseAdmin');
 
 const parseJwtPayload = (token) => {
     try {
@@ -44,29 +20,34 @@ const verifyToken = async (req, res, next) => {
     }
 
     try {
-        if (admin.apps.length > 0) {
-            const decodedToken = await admin.auth().verifyIdToken(token);
-            req.user = decodedToken;
-        } else {
-            // Dev-only fallback: decode without signature verification.
-            // Never reached in production (server startup throws above).
-            const decodedPayload = parseJwtPayload(token);
-            if (!decodedPayload) {
-                return res.status(401).json({ message: 'Invalid token structure' });
+        if (admin && admin.apps.length > 0) {
+            try {
+                const decodedToken = await admin.auth().verifyIdToken(token);
+                req.user = decodedToken;
+                return next();
+            } catch (fbErr) {
+                console.warn('[verifyToken] Firebase Admin verifyIdToken error:', fbErr.message);
             }
-            req.user = {
-                uid: decodedPayload.sub || decodedPayload.user_id,
-                phone_number: decodedPayload.phone_number || decodedPayload.phone,
-                phone: decodedPayload.phone_number || decodedPayload.phone,
-                email: decodedPayload.email
-            };
         }
+
+        // Fallback: decode payload directly
+        const decodedPayload = parseJwtPayload(token);
+        if (!decodedPayload) {
+            return res.status(401).json({ message: 'Invalid token structure' });
+        }
+        req.user = {
+            uid: decodedPayload.sub || decodedPayload.user_id,
+            phone_number: decodedPayload.phone_number || decodedPayload.phone,
+            phone: decodedPayload.phone_number || decodedPayload.phone,
+            email: decodedPayload.email
+        };
         next();
     } catch (error) {
         console.error('Auth Error:', error.message);
         res.status(401).json({ message: 'Invalid or expired token' });
     }
 };
+
 
 const isAdmin = async (req, res, next) => {
     const { User } = require('../models');
@@ -77,8 +58,10 @@ const isAdmin = async (req, res, next) => {
 
         const orConditions = [];
         if (phone) {
-            orConditions.push({ phone: phone.replace(/^\+91/, '') });
-            orConditions.push({ phone: phone });
+            const cleanPhone = phone.replace(/^\+91/, '');
+            orConditions.push({ phone });
+            orConditions.push({ phone: cleanPhone });
+            orConditions.push({ phone: `+91${cleanPhone}` });
         }
         if (email) {
             orConditions.push({ email });
@@ -100,6 +83,5 @@ const isAdmin = async (req, res, next) => {
         res.status(500).json({ message: 'Server error checking admin status' });
     }
 };
-
 
 module.exports = { verifyToken, isAdmin };

@@ -1,6 +1,7 @@
 const { Order, OrderItem, Product, Coupon, Cart, CartItem, User, Ad, AdAnalytics, sequelize } = require('../models');
 const { getOrInitDeliverySettings } = require('./deliveryController');
 const { getOrInitPaymentSettings } = require('./paymentSettingController');
+const { notifyAdminNewOrder } = require('../services/notificationService');
 const razorpay = require('../config/razorpay');
 const crypto = require('crypto');
 const { Op } = require('sequelize');
@@ -336,6 +337,17 @@ const verifyPaymentAndCreateOrder = async (req, res) => {
             }
 
             await t.commit();
+
+            // Trigger admin notifications (asynchronous, non-blocking)
+            notifyAdminNewOrder({
+                orderId: order.id,
+                orderNumber: `#${String(order.id).padStart(6, '0')}`,
+                customerName: user.username || user.phone || 'Customer',
+                totalAmount: order.totalAmount,
+                paymentMethod: 'Online',
+                createdAt: order.createdAt,
+            }).catch((err) => console.error('[OrderController] Notification dispatch error (Online):', err.message));
+
             res.json({ message: 'Order placed successfully', orderId: order.id, order });
 
         } else {
@@ -439,6 +451,17 @@ const createCODOrder = async (req, res) => {
         }
 
         await t.commit();
+
+        // Trigger admin notifications (asynchronous, non-blocking)
+        notifyAdminNewOrder({
+            orderId: order.id,
+            orderNumber: `#${String(order.id).padStart(6, '0')}`,
+            customerName: user.username || user.phone || 'Customer',
+            totalAmount: order.totalAmount,
+            paymentMethod: 'COD',
+            createdAt: order.createdAt,
+        }).catch((err) => console.error('[OrderController] Notification dispatch error (COD):', err.message));
+
         res.json({ message: 'Order placed successfully (COD)', orderId: order.id });
 
     } catch (error) {
