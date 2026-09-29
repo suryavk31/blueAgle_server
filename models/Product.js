@@ -1,6 +1,70 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+// Helpers for safe JSON serialization/deserialization for LONGTEXT columns
+const parseArray = (value) => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (!trimmed) return [];
+        try {
+            let parsed = JSON.parse(trimmed);
+            if (typeof parsed === 'string') {
+                try { parsed = JSON.parse(parsed); } catch { return []; }
+            }
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    }
+    return [];
+};
+
+const parseObject = (value) => {
+    if (!value) return {};
+    if (typeof value === 'object' && !Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (!trimmed) return {};
+        try {
+            let parsed = JSON.parse(trimmed);
+            if (typeof parsed === 'string') {
+                try { parsed = JSON.parse(parsed); } catch { return {}; }
+            }
+            return (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) ? parsed : {};
+        } catch {
+            return {};
+        }
+    }
+    return {};
+};
+
+const serializeArray = (value) => JSON.stringify(parseArray(value));
+const serializeObject = (value) => JSON.stringify(parseObject(value));
+
+const jsonArrayField = (fieldName) => ({
+    type: DataTypes.TEXT('long'),
+    allowNull: true,
+    get() {
+        return parseArray(this.getDataValue(fieldName));
+    },
+    set(value) {
+        this.setDataValue(fieldName, serializeArray(value));
+    },
+});
+
+const jsonObjectField = (fieldName) => ({
+    type: DataTypes.TEXT('long'),
+    allowNull: true,
+    get() {
+        return parseObject(this.getDataValue(fieldName));
+    },
+    set(value) {
+        this.setDataValue(fieldName, serializeObject(value));
+    },
+});
+
 const Product = sequelize.define('Product', {
     id: {
         type: DataTypes.INTEGER,
@@ -101,10 +165,7 @@ const Product = sequelize.define('Product', {
     },
 
     // ─── Media ────────────────────────────────────────────────────────────────
-    images: {
-        type: DataTypes.JSON, // Array of URLs
-        allowNull: true,
-    },
+    images: jsonArrayField('images'),
     videoUrl: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -155,22 +216,10 @@ const Product = sequelize.define('Product', {
     },
 
     // ─── Repeatable Content Arrays ────────────────────────────────────────────
-    tags: {
-        type: DataTypes.JSON, // Array of strings e.g. ["Organic", "Oil", "ColdPressed"]
-        allowNull: true,
-    },
-    ingredients: {
-        type: DataTypes.JSON, // Array of strings
-        allowNull: true,
-    },
-    benefits: {
-        type: DataTypes.JSON, // Array of strings
-        allowNull: true,
-    },
-    usageInstructions: {
-        type: DataTypes.JSON, // Array of strings
-        allowNull: true,
-    },
+    tags: jsonArrayField('tags'),
+    ingredients: jsonArrayField('ingredients'),
+    benefits: jsonArrayField('benefits'),
+    usageInstructions: jsonArrayField('usageInstructions'),
 
     // ─── Delivery & Policy Settings ───────────────────────────────────────────
     deliveryTime: {
@@ -213,10 +262,7 @@ const Product = sequelize.define('Product', {
     },
 
     // ─── Custom Attributes ────────────────────────────────────────────────────
-    customAttributes: {
-        type: DataTypes.JSON, // Key-value object
-        allowNull: true,
-    },
+    customAttributes: jsonObjectField('customAttributes'),
 }, {
     tableName: 'products',
     timestamps: true,
