@@ -22,6 +22,7 @@ const DeliverySetting = require('./DeliverySetting');
 const Blog = require('./Blog');
 const GaSetting = require('./GaSetting');
 const PaymentSetting = require('./PaymentSetting');
+const HomeSection = require('./HomeSection');
 
 // ─── Extended Product Metadata Models ────────────────────────────────────────
 const ProductHighlight = require('./ProductHighlight');
@@ -55,6 +56,9 @@ const AdminFcmToken = require('./AdminFcmToken');
 
 Category.hasMany(SubCategory, { foreignKey: 'categoryId', onDelete: 'CASCADE' });
 SubCategory.belongsTo(Category, { foreignKey: 'categoryId' });
+
+Category.hasMany(HomeSection, { foreignKey: 'categoryId', as: 'homeSections', onDelete: 'SET NULL' });
+HomeSection.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
 
 SubCategory.hasMany(Product, { foreignKey: 'subCategoryId', onDelete: 'CASCADE' });
 Product.belongsTo(SubCategory, { foreignKey: 'subCategoryId' });
@@ -189,6 +193,7 @@ module.exports = {
     Blog,
     GaSetting,
     PaymentSetting,
+    HomeSection,
     // Extended Product Metadata models
     ProductHighlight,
     ProductSpecification,
