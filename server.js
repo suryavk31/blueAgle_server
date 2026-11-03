@@ -154,6 +154,9 @@ app.use('/api/product-attributes', productAttributeRoutes);
 const homeSectionRoutes = require('./routes/homeSectionRoutes');
 app.use('/api/home-sections', homeSectionRoutes);
 
+const subscriberRoutes = require('./routes/subscriberRoutes');
+app.use('/api/subscribers', subscriberRoutes);
+
 // ─── Admin RBAC Routes ────────────────────────────────────────────────────────
 const adminAuthRoutes = require('./routes/adminAuthRoutes');
 const adminUsersRoutes = require('./routes/adminUsersRoutes');
@@ -198,6 +201,7 @@ app.use('/api/admin/blogs', blogRoutes);
 app.use('/api/admin/customer-users', userRoutes);
 app.use('/api/admin/product-attributes', productAttributeRoutes);
 app.use('/api/admin/home-sections', homeSectionRoutes);
+app.use('/api/admin/subscribers', subscriberRoutes);
 
 // ─── SEO & Sitemap ────────────────────────────────────────────────────────────
 const socialCrawlerMiddleware = require('./middleware/socialCrawlerMiddleware');

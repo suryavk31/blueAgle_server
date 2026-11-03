@@ -182,8 +182,17 @@ const createProduct = async (req, res) => {
 // ─── Get All Products ─────────────────────────────────────────────────────────
 const getProducts = async (req, res) => {
     try {
-        const { categoryId, subCategoryId, search, minPrice, maxPrice, sortBy, categoryIds, flag } = req.query;
+        const { categoryId, subCategoryId, search, minPrice, maxPrice, sortBy, categoryIds, flag, includeDrafts, status, visibility } = req.query;
         let where = {};
+
+        const isAdminRequest = Boolean(req.headers.authorization || includeDrafts === 'true');
+        if (!isAdminRequest) {
+            where.status = 'Published';
+            where.visibility = 'Public';
+        } else {
+            if (status) where.status = status;
+            if (visibility) where.visibility = visibility;
+        }
 
         let subCategoryInclude = { model: SubCategory, include: [Category] };
 

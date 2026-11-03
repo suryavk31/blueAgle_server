@@ -23,6 +23,7 @@ const Blog = require('./Blog');
 const GaSetting = require('./GaSetting');
 const PaymentSetting = require('./PaymentSetting');
 const HomeSection = require('./HomeSection');
+const Subscriber = require('./Subscriber');
 
 // ─── Extended Product Metadata Models ────────────────────────────────────────
 const ProductHighlight = require('./ProductHighlight');
@@ -194,6 +195,7 @@ module.exports = {
     GaSetting,
     PaymentSetting,
     HomeSection,
+    Subscriber,
     // Extended Product Metadata models
     ProductHighlight,
     ProductSpecification,
