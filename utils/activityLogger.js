@@ -24,9 +24,14 @@ const logActivity = async ({
     req = null,
 }) => {
     try {
-        const ipAddress = req
-            ? (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || null)
+        const rawIp = req
+            ? (req.headers['cf-connecting-ip']
+                || (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : null)
+                || req.ip
+                || req.socket?.remoteAddress
+                || null)
             : null;
+        const ipAddress = rawIp ? rawIp.substring(0, 45) : null;
         const userAgent = req ? (req.headers['user-agent'] || null) : null;
 
         await ActivityLog.create({

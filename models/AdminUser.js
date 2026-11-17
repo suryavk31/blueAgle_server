@@ -50,7 +50,7 @@ const AdminUser = sequelize.define('AdminUser', {
         allowNull: true,
     },
     lastLoginIp: {
-        type: DataTypes.STRING(45),
+        type: DataTypes.STRING(100),
         allowNull: true,
     },
     createdBy: {

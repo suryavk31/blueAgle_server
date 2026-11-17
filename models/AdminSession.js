@@ -21,7 +21,7 @@ const AdminSession = sequelize.define('AdminSession', {
         allowNull: true,
     },
     ipAddress: {
-        type: DataTypes.STRING(45),
+        type: DataTypes.STRING(100),
         allowNull: true,
     },
     loginTime: {

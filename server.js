@@ -54,6 +54,9 @@ if (process.env.NODE_ENV === 'development') {
 
 const app = express();
 
+// Trust reverse proxy (Nginx / Cloudflare on VPS) so req.ip reflects actual client IP
+app.set('trust proxy', true);
+
 // ─── Security Headers (Helmet) ────────────────────────────────────────────────
 app.use(helmet({
     // Allow cross-origin images served from ImageKit CDN

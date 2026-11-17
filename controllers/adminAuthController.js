@@ -50,7 +50,12 @@ exports.login = async (req, res) => {
 
         // Parse user-agent for session info
         const ua = req.headers['user-agent'] || '';
-        const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || null;
+        const rawIp = req.headers['cf-connecting-ip']
+            || (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : null)
+            || req.ip
+            || req.socket?.remoteAddress
+            || null;
+        const ip = rawIp ? rawIp.substring(0, 45) : null;
 
         // Create session record
         await AdminSession.create({
