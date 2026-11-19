@@ -42,7 +42,26 @@ const uploadMedia = multer({
     fileFilter: mediaFileFilter,
 });
 
+// Excel upload (20MB) — for bulk import spreadsheets (.xlsx, .xls)
+const excelFileFilter = (req, file, cb) => {
+    const allowedExtensions = /xlsx|xls/;
+    const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
+    const isExtAllowed = allowedExtensions.test(ext);
+
+    if (isExtAllowed) {
+        return cb(null, true);
+    }
+    cb(new Error(`Only Excel files (.xlsx, .xls) are allowed. Received: ${file.originalname}`), false);
+};
+
+const uploadExcel = multer({
+    storage,
+    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+    fileFilter: excelFileFilter,
+});
+
 // Default export kept for backwards compatibility — uses image config
 module.exports = uploadImage;
 module.exports.uploadImage = uploadImage;
 module.exports.uploadMedia = uploadMedia;
+module.exports.uploadExcel = uploadExcel;

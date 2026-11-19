@@ -336,6 +336,39 @@ const exportProductsCSV = async (req, res) => {
     }
 };
 
+// ─── Bulk Import Excel Template & Processing ──────────────────────────────────
+const { generateProductTemplate, parseProductExcel } = require('../services/excelImportService');
+
+const downloadProductTemplate = async (req, res) => {
+    try {
+        const buffer = await generateProductTemplate();
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename="Products_Import_Template.xlsx"');
+        res.setHeader('Cache-Control', 'no-cache');
+        return res.status(200).send(buffer);
+    } catch (error) {
+        console.error('[downloadProductTemplate] Error:', error);
+        return res.status(500).json({ message: 'Failed to generate product template: ' + error.message });
+    }
+};
+
+const bulkImportProducts = async (req, res) => {
+    try {
+        if (!req.file || !req.file.buffer) {
+            return res.status(400).json({ message: 'Please select an Excel file (.xlsx) to upload.' });
+        }
+
+        const results = await parseProductExcel(req.file.buffer);
+        return res.status(200).json({
+            message: 'Products bulk import processed successfully',
+            data: results
+        });
+    } catch (error) {
+        console.error('[bulkImportProducts] Error:', error);
+        return res.status(400).json({ message: error.message || 'Failed to process bulk import.' });
+    }
+};
+
 module.exports = {
     createProduct,
     getProducts,
@@ -343,4 +376,6 @@ module.exports = {
     updateProduct,
     deleteProduct,
     exportProductsCSV,
+    downloadProductTemplate,
+    bulkImportProducts,
 };

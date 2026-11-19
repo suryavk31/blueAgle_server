@@ -120,6 +120,39 @@ const deleteSubCategory = async (req, res) => {
     }
 };
 
+// ─── Bulk Import Excel Template & Processing ──────────────────────────────────
+const { generateCategoryTemplate, parseCategoryExcel } = require('../services/excelImportService');
+
+const downloadCategoryTemplate = async (req, res) => {
+    try {
+        const buffer = await generateCategoryTemplate();
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename="Categories_Import_Template.xlsx"');
+        res.setHeader('Cache-Control', 'no-cache');
+        return res.status(200).send(buffer);
+    } catch (error) {
+        console.error('[downloadCategoryTemplate] Error:', error);
+        return res.status(500).json({ message: 'Failed to generate category template: ' + error.message });
+    }
+};
+
+const bulkImportCategories = async (req, res) => {
+    try {
+        if (!req.file || !req.file.buffer) {
+            return res.status(400).json({ message: 'Please select an Excel file (.xlsx) to upload.' });
+        }
+
+        const results = await parseCategoryExcel(req.file.buffer);
+        return res.status(200).json({
+            message: 'Categories bulk import processed successfully',
+            data: results
+        });
+    } catch (error) {
+        console.error('[bulkImportCategories] Error:', error);
+        return res.status(400).json({ message: error.message || 'Failed to process bulk import.' });
+    }
+};
+
 module.exports = {
     getCategories,
     createCategory,
@@ -128,4 +161,6 @@ module.exports = {
     createSubCategory,
     updateSubCategory,
     deleteSubCategory,
+    downloadCategoryTemplate,
+    bulkImportCategories,
 };

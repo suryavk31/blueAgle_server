@@ -2,13 +2,19 @@ const express = require('express');
 const router = express.Router();
 const {
     getCategories, createCategory, updateCategory, deleteCategory,
-    createSubCategory, updateSubCategory, deleteSubCategory
+    createSubCategory, updateSubCategory, deleteSubCategory,
+    downloadCategoryTemplate, bulkImportCategories
 } = require('../controllers/categoryController');
 const { verifyAdminToken, requirePermission } = require('../middleware/adminAuthMiddleware');
 const upload = require('../middleware/uploadMiddleware');
+const { uploadExcel } = require('../middleware/uploadMiddleware');
 
 // ── Category routes ──────────────────────────────────────────────────────────
 router.get('/', getCategories); // Public
+
+// ── Bulk Import Excel Template & Upload ──────────────────────────────────────
+router.get('/template/download', verifyAdminToken, requirePermission('Categories', 'Create'), downloadCategoryTemplate);
+router.post('/bulk-import', verifyAdminToken, requirePermission('Categories', 'Create'), uploadExcel.single('file'), bulkImportCategories);
 
 router.post('/', verifyAdminToken, requirePermission('Categories', 'Create'), upload.single('image'), createCategory);
 
