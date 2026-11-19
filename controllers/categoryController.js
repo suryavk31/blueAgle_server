@@ -120,29 +120,33 @@ const deleteSubCategory = async (req, res) => {
     }
 };
 
-// ─── Bulk Import Excel Template & Processing ──────────────────────────────────
-const { generateCategoryTemplate, parseCategoryExcel } = require('../services/excelImportService');
+// ─── Bulk Import & Export CSV ─────────────────────────────────────────────────
+const {
+    generateCategoryCsvTemplate,
+    parseCategoryCsv,
+    exportAllCategoriesCsv
+} = require('../services/csvImportService');
 
 const downloadCategoryTemplate = async (req, res) => {
     try {
-        const buffer = await generateCategoryTemplate();
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', 'attachment; filename="Categories_Import_Template.xlsx"');
+        const csvContent = generateCategoryCsvTemplate();
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', 'attachment; filename="Categories_Import_Template.csv"');
         res.setHeader('Cache-Control', 'no-cache');
-        return res.status(200).send(buffer);
+        return res.status(200).send(csvContent);
     } catch (error) {
         console.error('[downloadCategoryTemplate] Error:', error);
-        return res.status(500).json({ message: 'Failed to generate category template: ' + error.message });
+        return res.status(500).json({ message: 'Failed to generate category CSV template: ' + error.message });
     }
 };
 
 const bulkImportCategories = async (req, res) => {
     try {
         if (!req.file || !req.file.buffer) {
-            return res.status(400).json({ message: 'Please select an Excel file (.xlsx) to upload.' });
+            return res.status(400).json({ message: 'Please select a CSV file (.csv) to upload.' });
         }
 
-        const results = await parseCategoryExcel(req.file.buffer);
+        const results = await parseCategoryCsv(req.file.buffer);
         return res.status(200).json({
             message: 'Categories bulk import processed successfully',
             data: results
@@ -150,6 +154,18 @@ const bulkImportCategories = async (req, res) => {
     } catch (error) {
         console.error('[bulkImportCategories] Error:', error);
         return res.status(400).json({ message: error.message || 'Failed to process bulk import.' });
+    }
+};
+
+const exportCategoriesCSV = async (req, res) => {
+    try {
+        const csv = await exportAllCategoriesCsv();
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', 'attachment; filename="categories_export.csv"');
+        return res.status(200).send(csv);
+    } catch (error) {
+        console.error('[exportCategoriesCSV] Error:', error);
+        return res.status(500).json({ message: 'Failed to export categories: ' + error.message });
     }
 };
 
@@ -163,4 +179,5 @@ module.exports = {
     deleteSubCategory,
     downloadCategoryTemplate,
     bulkImportCategories,
+    exportCategoriesCSV,
 };

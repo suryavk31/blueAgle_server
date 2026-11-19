@@ -7,7 +7,7 @@ const {
 const { verifyAdminToken, requirePermission } = require('../middleware/adminAuthMiddleware');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware'); // kept for customer-facing auth
 const upload = require('../middleware/uploadMiddleware');
-const { uploadExcel } = require('../middleware/uploadMiddleware');
+const { uploadCsv } = require('../middleware/uploadMiddleware');
 
 // Public route - list products
 router.get('/', getProducts);
@@ -15,7 +15,7 @@ router.get('/', getProducts);
 // Admin bulk & export routes (MUST be defined before /:id)
 router.get('/export/csv', verifyAdminToken, requirePermission('Products', 'Export'), exportProductsCSV);
 router.get('/template/download', verifyAdminToken, requirePermission('Products', 'Create'), downloadProductTemplate);
-router.post('/bulk-import', verifyAdminToken, requirePermission('Products', 'Create'), uploadExcel.single('file'), bulkImportProducts);
+router.post('/bulk-import', verifyAdminToken, requirePermission('Products', 'Create'), uploadCsv.single('file'), bulkImportProducts);
 
 // Public route - get by id
 router.get('/:id', getProductById);

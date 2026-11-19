@@ -319,46 +319,45 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-// ─── Export Products CSV ──────────────────────────────────────────────────────
+// ─── Bulk Import & Export CSV ─────────────────────────────────────────────────
+const {
+    generateProductCsvTemplate,
+    parseProductCsv,
+    exportAllProductsCsv
+} = require('../services/csvImportService');
+
 const exportProductsCSV = async (req, res) => {
     try {
-        const products = await Product.findAll({ include: defaultProductIncludes });
-        const headers = 'ID,Name,SKU,Brand,Price,MRP,Stock,Status,Category,SubCategory\n';
-        const rows = products.map(p => 
-            `"${p.id}","${p.name.replace(/"/g, '""')}","${p.sku || ''}","${p.brand || ''}","${p.price}","${p.mrp || ''}","${p.stock}","${p.status}","${p.SubCategory?.Category?.name || ''}","${p.SubCategory?.name || ''}"`
-        ).join('\n');
-        
-        res.setHeader('Content-Type', 'text/csv');
+        const csv = await exportAllProductsCsv();
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', 'attachment; filename="products_export.csv"');
-        res.status(200).send(headers + rows);
+        return res.status(200).send(csv);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[exportProductsCSV] Error:', error);
+        return res.status(500).json({ message: 'Failed to export products: ' + error.message });
     }
 };
 
-// ─── Bulk Import Excel Template & Processing ──────────────────────────────────
-const { generateProductTemplate, parseProductExcel } = require('../services/excelImportService');
-
 const downloadProductTemplate = async (req, res) => {
     try {
-        const buffer = await generateProductTemplate();
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', 'attachment; filename="Products_Import_Template.xlsx"');
+        const csvContent = await generateProductCsvTemplate();
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', 'attachment; filename="Products_Import_Template.csv"');
         res.setHeader('Cache-Control', 'no-cache');
-        return res.status(200).send(buffer);
+        return res.status(200).send(csvContent);
     } catch (error) {
         console.error('[downloadProductTemplate] Error:', error);
-        return res.status(500).json({ message: 'Failed to generate product template: ' + error.message });
+        return res.status(500).json({ message: 'Failed to generate product CSV template: ' + error.message });
     }
 };
 
 const bulkImportProducts = async (req, res) => {
     try {
         if (!req.file || !req.file.buffer) {
-            return res.status(400).json({ message: 'Please select an Excel file (.xlsx) to upload.' });
+            return res.status(400).json({ message: 'Please select a CSV file (.csv) to upload.' });
         }
 
-        const results = await parseProductExcel(req.file.buffer);
+        const results = await parseProductCsv(req.file.buffer);
         return res.status(200).json({
             message: 'Products bulk import processed successfully',
             data: results

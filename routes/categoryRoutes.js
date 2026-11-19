@@ -3,18 +3,19 @@ const router = express.Router();
 const {
     getCategories, createCategory, updateCategory, deleteCategory,
     createSubCategory, updateSubCategory, deleteSubCategory,
-    downloadCategoryTemplate, bulkImportCategories
+    downloadCategoryTemplate, bulkImportCategories, exportCategoriesCSV
 } = require('../controllers/categoryController');
 const { verifyAdminToken, requirePermission } = require('../middleware/adminAuthMiddleware');
 const upload = require('../middleware/uploadMiddleware');
-const { uploadExcel } = require('../middleware/uploadMiddleware');
+const { uploadCsv } = require('../middleware/uploadMiddleware');
 
 // ── Category routes ──────────────────────────────────────────────────────────
 router.get('/', getCategories); // Public
 
-// ── Bulk Import Excel Template & Upload ──────────────────────────────────────
+// ── Bulk Import & Export CSV (MUST be before /:id) ───────────────────────────
+router.get('/export/csv', verifyAdminToken, requirePermission('Categories', 'Export'), exportCategoriesCSV);
 router.get('/template/download', verifyAdminToken, requirePermission('Categories', 'Create'), downloadCategoryTemplate);
-router.post('/bulk-import', verifyAdminToken, requirePermission('Categories', 'Create'), uploadExcel.single('file'), bulkImportCategories);
+router.post('/bulk-import', verifyAdminToken, requirePermission('Categories', 'Create'), uploadCsv.single('file'), bulkImportCategories);
 
 router.post('/', verifyAdminToken, requirePermission('Categories', 'Create'), upload.single('image'), createCategory);
 
